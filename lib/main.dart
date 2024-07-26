@@ -1,37 +1,201 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-void main() {
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:morango/firebase_options.dart';
+import 'package:morango/models/device.dart';
+import 'package:morango/services/web.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+// chave global para navegar entre as telas
+final navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async{
+  
+  
+  //garante que o firebase esteja inicializado
+  WidgetsFlutterBinding.ensureInitialized();
+
+    await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  
+//Firebase messages
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+ String? token = await messaging.getToken();
+   NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+ // Verifica se o usuario autorizou as mensagens PUSH
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('[main#autorizouMensagem] SIM PERMITIU');
+     _startPushNotificationHandler(messaging);
+  } else if (settings.authorizationStatus==AuthorizationStatus.provisional) {
+
+    print('[main#autorizouMensagem] PERMITIU PROVISORIAMENTE ');
+    _startPushNotificationHandler(messaging);
+  }else {
+    print('[main#autorizouMensagem] NAO PERMITIU - NEGADA!!!');
+
+  }
+  
   runApp(const MyApp());
+
+
 }
+
+
+void _startPushNotificationHandler(FirebaseMessaging messaging) async{
+      final Logger logger = Logger();
+    String? token = await messaging.getToken();
+    logger.i('[#startPushNotificationHandler] TOKEN: $token');
+    setPushToken(token);
+
+    //Quando o app estiver aberto
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      logger.i('[#startPushNotificationHandler] Recebeu foreground (app Aberto)!');
+      print('dados da mensagem: ${message.data}');
+
+      if (message.notification != null) {
+        print('msg tambem veio com uma notificacao: ${message.notification}');
+      }
+    });
+
+    //Quando o app estiver fechado
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // Terminou
+    var dados_recebidos = await FirebaseMessaging.instance.getInitialMessage();
+    if (dados_recebidos!.data.isNotEmpty) {
+      if (dados_recebidos.data['message'] != null) {
+        showMyDialog(dados_recebidos.data['message']);
+
+      }
+
+    }
+
+
+}
+
+
+
+
+//Envia o token para o servidor
+void setPushToken(String? token) async {
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? prefsToken = prefs.getString('pushToken');
+  bool? prefsSent = prefs.getBool('tokenSent');
+
+  print('Prefs token - $prefsToken');
+
+  if(prefsToken != token || (prefsToken == token && prefsSent == false)) {
+    print('Enviando o token para o servidor');
+
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    String? brand;
+    String? model;
+
+    // Mostrar os vários tipos de tratamento que existem
+    // https://github.com/fluttercommunity/plus_plugins/blob/main/packages/device_info_plus/device_info_plus/example/lib/main.dart
+
+    if(Platform.isAndroid) {
+
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      print('Running on ${androidInfo.model}');  // e.g. "Moto G (4)"
+
+      model = androidInfo.model;
+      brand = androidInfo.brand;
+    } else {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      print('Running on ${iosInfo.utsname.machine}');  // e.g. "iPod7,1"
+
+      model = iosInfo.utsname.machine;
+      brand = 'Apple';
+    }
+
+
+    Device device = Device(token: token, brand: brand, model: model);
+    sendDevice(device);
+  }
+}
+
+//listener para mensagens em background
+// quando voltar a funcionar, verificar se o token mudou e enviar para o servidor
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async{
+  
+  print("---------------------------------");
+  print('[main#autorizouMensagem] Mensagem recebida em background: ${message.notification}');
+  return Future<void>.value();
+
+}
+
+
+
+
+
+
+void showMyDialog(String message){
+  //botao
+  Widget okButton = OutlinedButton(
+    onPressed: () {
+      //Passa o contexto do navigatorKey que vai ser preenchido no futuro.
+      Navigator.pop(navigatorKey.currentContext!);
+    },
+    child: Text('OK'),
+  );
+
+  AlertDialog alerta = AlertDialog(
+    title: Text('Promoção Imperdível'),
+    content: Text(message),
+    actions: [
+      okButton,
+    ],
+  );
+
+  //Empurrando o contexto pra dentro.
+  showDialog(context: navigatorKey.currentContext!, builder: (BuildContext context){
+    return alerta;
+
+  });
+
+}
+
+
+
+
+
+
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // Raiz do app
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Morango',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Morango'),
+      navigatorKey: navigatorKey,
     );
   }
 }
@@ -39,14 +203,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -106,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Voce apertou o botão essa quantidade de vezes:',
             ),
             Text(
               '$_counter',
@@ -118,8 +274,10 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.backup_table),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
+
+
