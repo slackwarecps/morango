@@ -66,7 +66,8 @@ void _startPushNotificationHandler(FirebaseMessaging messaging) async{
     //Quando o app estiver aberto
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       logger.i('[#startPushNotificationHandler] Recebeu foreground (app Aberto)!');
-      print('dados da mensagem: ${message.data}');
+       print('dados da mensagem: ${message.data}');
+       
 
       if (message.notification != null) {
         print('msg tambem veio com uma notificacao: ${message.notification}');
@@ -77,10 +78,10 @@ void _startPushNotificationHandler(FirebaseMessaging messaging) async{
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     // Terminou
-    var dados_recebidos = await FirebaseMessaging.instance.getInitialMessage();
-    if (dados_recebidos!.data.isNotEmpty) {
-      if (dados_recebidos.data['message'] != null) {
-        showMyDialog(dados_recebidos.data['message']);
+    var dadosRecebidos = await FirebaseMessaging.instance.getInitialMessage();
+    if (dadosRecebidos!.data.isNotEmpty) {
+      if (dadosRecebidos.data['message'] != null) {
+        showMyDialog(dadosRecebidos.data['message']);
 
       }
 
@@ -154,11 +155,11 @@ void showMyDialog(String message){
       //Passa o contexto do navigatorKey que vai ser preenchido no futuro.
       Navigator.pop(navigatorKey.currentContext!);
     },
-    child: Text('OK'),
+    child: const Text('OK'),
   );
 
   AlertDialog alerta = AlertDialog(
-    title: Text('Promoção Imperdível'),
+    title: const Text('Promoção Imperdível'),
     content: Text(message),
     actions: [
       okButton,
@@ -194,7 +195,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Morango '),
+      home: const MyHomePage(title: 'Morango v1.0.2'),
       navigatorKey: navigatorKey,
     );
   }

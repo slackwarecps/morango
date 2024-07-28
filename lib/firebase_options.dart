@@ -53,11 +53,12 @@ class DefaultFirebaseOptions {
     projectId: 'teste123-8236a',
     authDomain: 'teste123-8236a.firebaseapp.com',
     storageBucket: 'teste123-8236a.appspot.com',
+    measurementId: 'G-XVMY6ZF075',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBrKU_thmc-avjqeIg34hqJFesEdGbEioI',
-    appId: '1:299976161637:android:7f99933c4c8db8b362898c',
+    appId: '1:299976161637:android:3d8efd48203de87062898c',
     messagingSenderId: '299976161637',
     projectId: 'teste123-8236a',
     storageBucket: 'teste123-8236a.appspot.com',

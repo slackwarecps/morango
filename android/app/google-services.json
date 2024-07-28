@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:299976161637:android:d7b8f8d405a1f8f362898c",
+        "mobilesdk_app_id": "1:299976161637:android:3d8efd48203de87062898c",
         "android_client_info": {
-          "package_name": "br.com.fa"
+          "package_name": "br.com.fabioalvaro.moran"
         }
       },
       "oauth_client": [],
@@ -29,6 +29,25 @@
         "mobilesdk_app_id": "1:299976161637:android:7f99933c4c8db8b362898c",
         "android_client_info": {
           "package_name": "br.com.fabioalvaro.morango"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrKU_thmc-avjqeIg34hqJFesEdGbEioI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299976161637:android:a23e173f93e5aed562898c",
+        "android_client_info": {
+          "package_name": "br.com.fabioalvaro.secrete_friend_drawer"
         }
       },
       "oauth_client": [],
