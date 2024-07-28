@@ -66,7 +66,8 @@ void _startPushNotificationHandler(FirebaseMessaging messaging) async{
     //Quando o app estiver aberto
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       logger.i('[#startPushNotificationHandler] Recebeu foreground (app Aberto)!');
-      print('dados da mensagem: ${message.data}');
+       print('dados da mensagem: ${message.data}');
+       
 
       if (message.notification != null) {
         print('msg tambem veio com uma notificacao: ${message.notification}');
