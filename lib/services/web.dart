@@ -41,9 +41,9 @@ void sendDevice(Device device) async {
   prefs.setString('pushToken', device.token!);
   prefs.setBool('tokenSent', false);
 
-  if (response.statusCode != 200)
+  if (response.statusCode != 200) {
     throw Exception('Falha para criar o dispositivo');
-  else {
+  } else {
     prefs.setBool('tokenSent', true);
   }
 }

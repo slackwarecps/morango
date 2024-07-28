@@ -77,10 +77,10 @@ void _startPushNotificationHandler(FirebaseMessaging messaging) async{
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     // Terminou
-    var dados_recebidos = await FirebaseMessaging.instance.getInitialMessage();
-    if (dados_recebidos!.data.isNotEmpty) {
-      if (dados_recebidos.data['message'] != null) {
-        showMyDialog(dados_recebidos.data['message']);
+    var dadosRecebidos = await FirebaseMessaging.instance.getInitialMessage();
+    if (dadosRecebidos!.data.isNotEmpty) {
+      if (dadosRecebidos.data['message'] != null) {
+        showMyDialog(dadosRecebidos.data['message']);
 
       }
 
@@ -154,11 +154,11 @@ void showMyDialog(String message){
       //Passa o contexto do navigatorKey que vai ser preenchido no futuro.
       Navigator.pop(navigatorKey.currentContext!);
     },
-    child: Text('OK'),
+    child: const Text('OK'),
   );
 
   AlertDialog alerta = AlertDialog(
-    title: Text('Promoção Imperdível'),
+    title: const Text('Promoção Imperdível'),
     content: Text(message),
     actions: [
       okButton,
