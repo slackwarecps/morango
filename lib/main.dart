@@ -194,7 +194,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Morango '),
+      home: const MyHomePage(title: 'Morango v1.0.2'),
       navigatorKey: navigatorKey,
     );
   }
